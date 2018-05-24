@@ -1,0 +1,212 @@
+ 
+<html>
+
+<body>
+
+<h2>Results</h2>
+
+<p id="success"></p>
+<p id="skipped"></p>
+<p id="error"></p>
+
+<script type="text/javascript">
+//  JS Web Crawler
+//  Writen by Timothy Tierney
+
+/*
+    This is the 'Internet'. We have both JSON test files stores in string.
+    Only one can be active at a time.
+*/
+var internet = '{"pages": [{"address":"http://foo.bar.com/p1","links": ["http://foo.bar.com/p2", "http://foo.bar.com/p3", "http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p2","links": ["http://foo.bar.com/p2", "http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p4","links": ["http://foo.bar.com/p5", "http://foo.bar.com/p1", "http://foo.bar.com/p6"]},{"address":"http://foo.bar.com/p5","links": []},{"address":"http://foo.bar.com/p6","links": ["http://foo.bar.com/p7", "http://foo.bar.com/p4", "http://foo.bar.com/p5"]}]}';
+
+//var internet = '{"pages": [{"address":"http://foo.bar.com/p1","links": ["http://foo.bar.com/p2"]},{"address":"http://foo.bar.com/p2","links": ["http://foo.bar.com/p3"]},{"address":"http://foo.bar.com/p3","links": ["http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p4","links": ["http://foo.bar.com/p5"]},{"address":"http://foo.bar.com/p5","links": ["http://foo.bar.com/p1"]},{"address":"http://foo.bar.com/p6","links": ["http://foo.bar.com/p1"]}]}'
+
+
+//  We parse the JSON for our crawler to use
+webj = JSON.parse(internet);
+
+//  Our crawler
+var crawlStack =        [];
+
+var successPages =      [];
+var skippedPages =      [];
+var errorPages =        [];
+
+/*
+    Current page will be used to keep
+    track of what page we are accessing
+*/
+var currentPage = 0;
+
+// MAX_CYCLE determins the amount of steps taken in
+// the crawl. if crawl is empty, it leaves the MAX_CYCLE.
+// The current examples don't need more than 7.
+var MAX_CYCLE = 8;
+
+//  Initialize crawl with the first address
+crawlStack.push(webj.pages[0].address);
+
+/*
+    This is the main loop CYCLE.
+*/
+for(var cycle =0; cycle< MAX_CYCLE; cycle++){
+//  If crawl is empty, we are done
+if(crawlStack.length == 0){
+    break;
+}
+//  Getting the current page
+currentPage = crawlStack.pop();
+crawlStack.push(currentPage);
+
+    //  CurrentPage address
+    console.log("current page address " + currentPage);
+    
+    //  Find current page
+    for(var i =0; i<webj.pages.length; i++){
+
+        if(webj.pages[i].address == currentPage) {
+            currentPage = i;
+        }
+
+    }
+    //  CurrentPage location
+    console.log("current page location " + currentPage);
+
+    //  Check to see if address does not exist on the internet
+    if(webj.pages[currentPage] == undefined){
+        errorPages.push(currentPage);
+        crawlStack.pop();
+        console.log("Failed to find address");
+        continue;
+    }
+
+    //  Add current page to success and remove it from
+    //  The crawl stack
+    successPages.push(crawlStack.pop());
+
+
+    //  Tracking empty list
+    if(webj.pages[currentPage].links.length == 0){
+            console.log("Empty list");
+    }
+
+    //  Adding links from current page to the crawl 
+    for(var i = 0; i < webj.pages[currentPage].links.length; i++){
+        var isSeen = false;
+        //  Check to see if page has been visited before
+
+        //If the file had already been in the skip, we don't need to add it again
+        if(skippedPages.length > 0){
+            for(var k = 0; k <= skippedPages.length; k++){
+                if(webj.pages[currentPage].links[i] == skippedPages[k]){
+                    isSeen = true;
+                    continue;
+                }             
+            }
+            if(isSeen == true){
+                continue;
+            }
+        }
+
+        //  If the page has been visited we skip it
+        for(var j = 0; j< successPages.length; j++){
+            if(webj.pages[currentPage].links[i] == successPages[j]){
+                isSeen= true;
+                skippedPages.push(webj.pages[currentPage].links[i]);  
+            }       
+        }
+        //  If page is already in the crawl, we dont need to add it again
+        for(var j =0; j < crawlStack.length; j++){
+            if(webj.pages[currentPage].links[i] == crawlStack[j]){
+                isSeen= true;
+                skippedPages.push(webj.pages[currentPage].links[i]);
+            }
+        }
+        //  If the page has not been seen, we can add it to the crawl stack
+        if(isSeen == false){
+        crawlStack.push(webj.pages[currentPage].links[i]);
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////\
+
+        //  Checking the results
+        //  If complete, the crawl should be empty
+        console.log("---------check current stacks ----------");
+
+        for(i in crawlStack){
+                console.log(" In crawl " + crawlStack[i]);
+        }
+        console.log("-----")
+        for(i in successPages){
+                console.log(" Success " + successPages[i]);
+        }
+        console.log("-----")
+        for(i in skippedPages){
+                console.log(" Skipped " + skippedPages[i]);
+        }
+        console.log("-----")
+        for(i in errorPages){
+                console.log(" Error " + errorPages[i]);
+        }
+//////////////////////////////////////////////////////////////////
+        
+        /*
+            Output the results to be displayed on the page
+        */
+
+        successString = "";
+        skippedString = "";
+        errorString = "";
+
+        successString = "Success: ["
+        for(var i = 0; i < successPages.length; i++){
+                successString += successPages[i];
+                if ( successPages.length >1 && i !=successPages.length-1){
+                        successString += ", ";
+                }
+        }
+        successString += "]";
+        document.getElementById("success").innerHTML = successString;
+
+        skippedString = "Skipped: ["
+        for(var i = 0; i < skippedPages.length; i++){
+                skippedString += skippedPages[i];
+                if ( skippedPages.length >1 && i !=skippedPages.length-1){
+                        skippedString += ", ";
+                }
+        }
+        skippedString += "]";
+        document.getElementById("skipped").innerHTML = skippedString;
+
+
+        errorString = "Error: ["
+        for(var i = 0; i < errorPages.length; i++){
+                errorString += errorPages[i];
+                if ( errorPages.length >1 && i !=errorPages.length-1){
+                        errorString += ", ";
+                }
+        }
+        errorString += "]";
+        document.getElementById("error").innerHTML = errorString;
+
+        ////////////////////////////////////////
+        //  Return the arrays of the results
+        function getSuccess() {
+                return successPages;
+        }
+        function getSkipped() {
+                return skippedPages;
+        }
+        function getError() {
+                return errorPages;
+        }
+
+        getSuccess();
+        getSkipped();
+        getError();
+
+</script>
+</body>
+</html>
