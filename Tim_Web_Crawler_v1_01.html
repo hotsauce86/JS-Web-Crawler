@@ -14,13 +14,19 @@
 //  Writen by Timothy Tierney
 
 /*
-    This is the 'Internet'. We have both JSON test files stores in string.
-    Only one can be active at a time.
+    This is the 'Internet', stored in a JSON file. The goal of this project is to design a crawler that takes the first web address from the parsed websites and follow the working addresses until all the valid sites have been visited. For simplicity and testing, I've opted to store the JSON directly in the JavaScript as a string. The crawler needs to be tested against these two cases below.
+
 */
 var internet = '{"pages": [{"address":"http://foo.bar.com/p1","links": ["http://foo.bar.com/p2", "http://foo.bar.com/p3", "http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p2","links": ["http://foo.bar.com/p2", "http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p4","links": ["http://foo.bar.com/p5", "http://foo.bar.com/p1", "http://foo.bar.com/p6"]},{"address":"http://foo.bar.com/p5","links": []},{"address":"http://foo.bar.com/p6","links": ["http://foo.bar.com/p7", "http://foo.bar.com/p4", "http://foo.bar.com/p5"]}]}';
 
 //var internet = '{"pages": [{"address":"http://foo.bar.com/p1","links": ["http://foo.bar.com/p2"]},{"address":"http://foo.bar.com/p2","links": ["http://foo.bar.com/p3"]},{"address":"http://foo.bar.com/p3","links": ["http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p4","links": ["http://foo.bar.com/p5"]},{"address":"http://foo.bar.com/p5","links": ["http://foo.bar.com/p1"]},{"address":"http://foo.bar.com/p6","links": ["http://foo.bar.com/p1"]}]}'
 
+
+///////////////////////////////////////////////
+
+/*
+    START
+*/
 
 //  We parse the JSON for our crawler to use
 webj = JSON.parse(internet);
@@ -28,40 +34,50 @@ webj = JSON.parse(internet);
 //  Our crawler
 var crawlStack =        [];
 
+//  The results
 var successPages =      [];
 var skippedPages =      [];
 var errorPages =        [];
 
 /*
     Current page will be used to keep
-    track of what page we are accessing
+    track of what page we are accessing.
+    The variable will switch between the address
+    string itself with the index value of where
+    it is located within the address array.
 */
 var currentPage = 0;
 
 // MAX_CYCLE determins the amount of steps taken in
 // the crawl. if crawl is empty, it leaves the MAX_CYCLE.
-// The current examples don't need more than 7.
+// The current examples don't need more than 7 cycles.
 var MAX_CYCLE = 8;
 
 //  Initialize crawl with the first address
 crawlStack.push(webj.pages[0].address);
 
+//////////////////////////////////////////////////////////////////////////
+
 /*
-    This is the main loop CYCLE.
+    CYCLE.
 */
+
+//  Loop starts here
 for(var cycle =0; cycle< MAX_CYCLE; cycle++){
+
 //  If crawl is empty, we are done
 if(crawlStack.length == 0){
     break;
 }
-//  Getting the current page
+
+//  Getting the current page address string
 currentPage = crawlStack.pop();
 crawlStack.push(currentPage);
 
-    //  CurrentPage address
+    //  CurrentPage address string
     console.log("current page address " + currentPage);
     
-    //  Find current page
+    //  Find current page in accessible addresses
     for(var i =0; i<webj.pages.length; i++){
 
         if(webj.pages[i].address == currentPage) {
@@ -69,7 +85,7 @@ crawlStack.push(currentPage);
         }
 
     }
-    //  CurrentPage location
+    //  CurrentPage index value
     console.log("current page location " + currentPage);
 
     //  Check to see if address does not exist on the internet
@@ -130,6 +146,10 @@ crawlStack.push(currentPage);
 }
 
 //////////////////////////////////////////////////////////////////////////////\
+    
+        /*
+            CHECK
+        */
 
         //  Checking the results
         //  If complete, the crawl should be empty
@@ -153,7 +173,7 @@ crawlStack.push(currentPage);
 //////////////////////////////////////////////////////////////////
         
         /*
-            Output the results to be displayed on the page
+            OUTPUT TO SITE PAGE
         */
 
         successString = "";
@@ -192,7 +212,11 @@ crawlStack.push(currentPage);
         document.getElementById("error").innerHTML = errorString;
 
         ////////////////////////////////////////
-        //  Return the arrays of the results
+
+        /*
+            RETURN 
+        */
+
         function getSuccess() {
                 return successPages;
         }
@@ -203,9 +227,9 @@ crawlStack.push(currentPage);
                 return errorPages;
         }
 
-        getSuccess();
-        getSkipped();
-        getError();
+        window.getSuccess();
+        window.getSkipped();
+        window.getError();
 
 </script>
 </body>
