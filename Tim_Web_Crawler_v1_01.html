@@ -14,7 +14,7 @@
 //  Writen by Timothy Tierney
 
 /*
-    This is the 'Internet', stored in a JSON file. The goal of this project is to design a crawler that takes the first web address from the parsed websites and follow the working addresses until all the valid sites have been visited. For simplicity and testing, I've opted to store the JSON directly in the JavaScript as a string. The crawler needs to be tested against these two cases below.
+    This is the 'Internet', stored in a JSON file. The goal of this project is to design a crawler that takes the first web address from the parsed websites and follow the working addresses until all the valid sites have been visited. For simplicity and testing, the JSON is stored in a string to be parsed.
 
 */
 var internet = '{"pages": [{"address":"http://foo.bar.com/p1","links": ["http://foo.bar.com/p2", "http://foo.bar.com/p3", "http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p2","links": ["http://foo.bar.com/p2", "http://foo.bar.com/p4"]},{"address":"http://foo.bar.com/p4","links": ["http://foo.bar.com/p5", "http://foo.bar.com/p1", "http://foo.bar.com/p6"]},{"address":"http://foo.bar.com/p5","links": []},{"address":"http://foo.bar.com/p6","links": ["http://foo.bar.com/p7", "http://foo.bar.com/p4", "http://foo.bar.com/p5"]}]}';
@@ -96,6 +96,7 @@ crawlStack.push(currentPage);
         continue;
     }
 
+    //  If The page is valid
     //  Add current page to success and remove it from
     //  The crawl stack
     successPages.push(crawlStack.pop());
